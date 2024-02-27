@@ -1,3 +1,13 @@
+# How to Run
+
+To use the functionality you will need an OpenAI API key, which we will provide if the judges would like to test out our application. 
+
+1. Clone the repo, and in the root directory, run "pip install -r requirements.txt", followed by "uvicorn main:app --reload".
+
+2. In a new terminal window, navigate to the root directory, then "cd lecture-capture", then "npm install", then "npm run dev"
+
+3. The application should be available in your browser at http://localhost:8000/
+
 ## Inspiration
 
 The initial inspiration for this project was about enabling students with a means to get the most out of courses when they simply don't match up well with the professors teaching style. We have both experienced this before, and it's very frustrating to be paying so much for a non-optimal learning experience. It's something that has affected us personally and we believe that a solution would benefit a lot of students.
