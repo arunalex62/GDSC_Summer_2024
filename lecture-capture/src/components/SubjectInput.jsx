@@ -33,7 +33,7 @@ export const SubjectInput = () => {
                 setAudio(audioUrl);
                 setAudioChunks([]);
 
-                var transcript = sendToServer(audioBlob);
+                var transcript = sendAudioToServer(audioBlob);
                 console.log(transcript);
         };
         }
@@ -77,7 +77,7 @@ export const SubjectInput = () => {
         setTextResponse("");
     }
 
-    const sendToServer = async (audioFile) => {
+    const sendAudioToServer = async (audioFile) => {
         const formData = new FormData();
         formData.append("file", audioFile);
 
@@ -111,6 +111,36 @@ export const SubjectInput = () => {
                     setWaitingResponse(false);
                 });
             }
+        }
+        catch (error) {
+            console.error("Error:", error);
+            setWaitingResponse(false);
+        }
+    };
+
+    const sendTextToServer = async (textPrompt) => {
+        setWaitingResponse(true);
+        console.log(textPrompt);
+
+        // Smoothly scroll down to near the bottom of the page
+        window.scrollTo({ top: 600, behavior: "smooth" });
+
+        try {
+            const prompt = textPrompt;
+
+            // This uses axios because of issues formatting the request with fetch
+            axios.post('http://127.0.0.1:8000/generate', { prompt })
+            .then(response => {
+                console.log('Response:', response);
+                setTextResponse(response.data.summary);
+                markdown = `${response.data.summary}`;
+                setWaitingResponse(false);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                setWaitingResponse(false);
+            });
+        
         }
         catch (error) {
             console.error("Error:", error);
