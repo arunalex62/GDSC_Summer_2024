@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import recording from "./recording.svg";
+import { OneEightyRingWithBg } from "react-svg-spinners";
 
 export const SubjectInput = () => {
     const [permission, setPermission] = useState(false);
@@ -10,6 +11,9 @@ export const SubjectInput = () => {
     const [audio, setAudio] = useState(null);
     const mimeType = "audio/mp3";
     const [isRecording, setIsRecording] = useState(false);
+
+    const [waitingResponse, setWaitingResponse] = useState(false);
+    const [textResponse, setTextResponse] = useState("");
 
     const getMicrophonePermission = async () => {
         console.log("isRecording:" + isRecording + " permission:" + permission);
@@ -22,6 +26,9 @@ export const SubjectInput = () => {
                 const audioUrl = URL.createObjectURL(audioBlob);
                 setAudio(audioUrl);
                 setAudioChunks([]);
+
+                var transcript = sendToServer(audioBlob);
+                console.log(transcript);
         };
         }
         else if(permission === false){ 
@@ -57,6 +64,42 @@ export const SubjectInput = () => {
         }
     };
 
+    const sendToServer = async (audioFile) => {
+        const formData = new FormData();
+        formData.append("file", audioFile);
+
+        setWaitingResponse(true);
+
+        try {
+            const response = await fetch("http://127.0.0.1:8000/transcribe", {
+                method: "POST",
+                body: formData,
+            });
+        
+            if (response.ok) {
+                const data = await response.json();
+                console.log(data.transcript);
+
+                const response2 = await fetch("http://127.0.0.1:8000/generate", {
+                    method: "POST",
+                    body: data.transcript,
+                });
+
+                if (response2.ok) {
+                    const data2 = await response2.json();
+                    console.log(data2);
+                    setTextResponse(data2.text);
+                    setWaitingResponse(false);
+                } else {
+                    setWaitingResponse(false);
+                }
+            }
+        }
+        catch (error) {
+            console.error("Error:", error);
+        }
+    };
+
     return (
         <form>
             <div className="relative">
@@ -66,7 +109,7 @@ export const SubjectInput = () => {
                     w-1/5"
                     onClick={getMicrophonePermission}>
                     {isRecording ? (<img src={recording} alt="recording" /> ) : (
-                    <svg fill="#94a3b8" height="40px" width="40px" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xmlnsXlink="http://www.w3.org/1999/xlink">
+                    <svg className="hover:fill-slate-700 hover:cursor-pointer" fill="#94a3b8" height="40px" width="40px" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" xmlnsXlink="http://www.w3.org/1999/xlink">
                         <g>
                             <rect className="stroke: #fff; fill: #fff; fill-opacity: 0; stroke-opacity: 0;" x="0" y="0" width="10" height="10" />
                             <g>
@@ -78,12 +121,39 @@ export const SubjectInput = () => {
                     )}
                 </div>
             </div>
-            <div className="flex justify-center items-center">
+
+            <div className="flex justify-center items-center mt-8">
                 {audio ? (
-                    <audio controls src={audio} className="w-1/3 pt-8 flex justify-center items-center h-20 rounded-md font-mono indent-6 text-slate-800 text-lg"></audio>
+                    <div className="w-1/3 flex gap-2 justify-center items-center">
+                        <audio controls src={audio} 
+                        className="h-14 w-full rounded-md font-mono indent-6 text-slate-800 text-lg">
+                        </audio>
+                        <button type="button" className="active:scale-95">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="#dc2626" className="w-12 h-12">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                            </svg>
+                        </button>
+                    </div>
                 ) : (
                     <div></div>
                 )} 
+            </div>
+
+            <div className="flex justify-center mt-8">
+                { waitingResponse ? ( 
+                <button type="button" 
+                className="flex items-center h-16 p-4 bg-white rounded-md border-slate-300 border-4 font-mono indent-6
+                text-slate-800 text-lg" disabled>
+                <OneEightyRingWithBg />
+                    Processing...
+                </button>
+                ) : (
+                    <div></div>
+                )} 
+            </div>
+
+            <div className="flex justify-center mt-8 text-white">
+                { textResponse }
             </div>
         </form>
     )
