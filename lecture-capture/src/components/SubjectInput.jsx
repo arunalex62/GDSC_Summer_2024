@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import recording from "./recording.svg";
 import { OneEightyRingWithBg } from "react-svg-spinners";
+import axios from "axios";
 
 export const SubjectInput = () => {
     const [permission, setPermission] = useState(false);
@@ -78,21 +79,20 @@ export const SubjectInput = () => {
         
             if (response.ok) {
                 const data = await response.json();
-                console.log(data.transcript);
 
-                const response2 = await fetch("http://127.0.0.1:8000/generate", {
-                    method: "POST",
-                    body: data.transcript,
+                const prompt = data.transcript;
+
+                // This uses axios because of issues formatting the request with fetch
+                axios.post('http://127.0.0.1:8000/generate', { prompt })
+                .then(response => {
+                    console.log('Response:', response);
+                    setTextResponse(response.data.summary);
+                    setWaitingResponse(false);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    setWaitingResponse(false);
                 });
-
-                if (response2.ok) {
-                    const data2 = await response2.json();
-                    console.log(data2);
-                    setTextResponse(data2.text);
-                    setWaitingResponse(false);
-                } else {
-                    setWaitingResponse(false);
-                }
             }
         }
         catch (error) {
