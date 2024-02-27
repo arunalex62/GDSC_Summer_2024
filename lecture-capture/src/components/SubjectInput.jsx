@@ -1,6 +1,7 @@
-import { useState, useRef } from "react";
-import recording from "./recording.svg";
+import React, { useState, useRef } from "react";
 import { OneEightyRingWithBg } from "react-svg-spinners";
+import recording from "./recording.svg";
+import Markdown from "react-markdown";
 import axios from "axios";
 
 export const SubjectInput = () => {
@@ -15,6 +16,8 @@ export const SubjectInput = () => {
 
     const [waitingResponse, setWaitingResponse] = useState(false);
     const [textResponse, setTextResponse] = useState("");
+    var markdown = ``;
+
     const abortController = new AbortController();
     const signal = abortController.signal;
 
@@ -71,6 +74,7 @@ export const SubjectInput = () => {
         setAudio(null); 
         abortController.abort();
         setWaitingResponse(false);
+        setTextResponse("");
     }
 
     const sendToServer = async (audioFile) => {
@@ -78,6 +82,9 @@ export const SubjectInput = () => {
         formData.append("file", audioFile);
 
         setWaitingResponse(true);
+
+        // Smoothly scroll down to near the bottom of the page
+        window.scrollTo({ top: 600, behavior: "smooth" });
 
         try {
             const response = await fetch("http://127.0.0.1:8000/transcribe", {
@@ -96,6 +103,7 @@ export const SubjectInput = () => {
                 .then(response => {
                     console.log('Response:', response);
                     setTextResponse(response.data.summary);
+                    markdown = `${response.data.summary}`;
                     setWaitingResponse(false);
                 })
                 .catch(error => {
@@ -134,11 +142,14 @@ export const SubjectInput = () => {
 
             <div className="flex justify-center items-center mt-8">
                 {audio ? (
-                    <div className="w-1/3 flex gap-2 justify-center items-center">
+                    <div className="w-2/5 flex gap-4 justify-center items-center">
+                        <label className="text-xl text-white">
+                            Recording:
+                        </label>
                         <audio controls src={audio} 
                         className="h-14 w-full rounded-md font-mono indent-6 text-slate-800 text-lg">
                         </audio>
-                        <button type="button" className="active:scale-95" onClick={removeAudio}>
+                        <button aria-description="Remove recording" type="button" className="active:scale-95 bg-white rounded-full" onClick={removeAudio}>
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="#dc2626" className="w-12 h-12">
                             <path strokeLinecap="round" strokeLinejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                             </svg>
@@ -149,22 +160,27 @@ export const SubjectInput = () => {
                 )} 
             </div>
 
+            { waitingResponse ? ( 
+
             <div className="flex justify-center mt-8">
-                { waitingResponse ? ( 
                 <button type="button" 
                 className="flex items-center h-16 p-4 bg-white rounded-md border-slate-300 border-4 font-mono indent-6
                 text-slate-800 text-lg" disabled>
                 <OneEightyRingWithBg />
                     Processing...
                 </button>
-                ) : (
-                    <div></div>
-                )} 
             </div>
+            ) : (
+                <div></div>
+            )} 
 
-            <div className="flex justify-center mt-8 text-white">
+            { textResponse ? ( 
+            <Markdown className="m-auto p-8 my-8 text-left justify-center text-slate-800 bg-white w-2/3 rounded-md border-slate-300 border-4">
                 { textResponse }
-            </div>
+            </Markdown>
+            ) : (
+                <div></div>
+            )}
         </form>
     )
 }

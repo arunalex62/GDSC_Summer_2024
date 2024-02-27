@@ -6,3 +6,59 @@
 body {
   place-items: start;
 }
+
+h1 {
+  margin-bottom: 1rem;
+  font-size: x-large;
+}
+
+h2 {
+  margin-bottom: 1rem;
+  font-size: larger;
+}
+
+h3 {
+  margin-bottom: 0.5rem;
+  font-size: large;
+  font-weight: bold;
+
+}
+
+h4 {
+  margin-bottom: 0.5rem;
+  font-size: large;
+  font-style: italic;
+}
+
+/* Apply style to a p within any other element */
+* p {
+  margin-bottom: 1rem;
+}
+
+
+p {
+  margin-bottom: 0rem;
+}
+
+hr {
+  margin-bottom: 1rem;
+  border-top-width: 2px;
+}
+
+ol {
+  margin-bottom: 1rem;
+}
+
+ul {
+  margin-bottom: 1rem;
+}
+
+ol li p {
+  margin-bottom: 0;
+}
+
+a {
+  color: #0070f3;
+  text-decoration: underline;
+  font-weight: bold;
+}
