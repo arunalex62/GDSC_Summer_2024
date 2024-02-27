@@ -119,14 +119,15 @@ export const SubjectInput = () => {
     };
 
     const sendTextToServer = async (textPrompt) => {
+        if(textPrompt.key !== "Enter") return;
+
         setWaitingResponse(true);
-        console.log(textPrompt);
 
         // Smoothly scroll down to near the bottom of the page
         window.scrollTo({ top: 600, behavior: "smooth" });
 
         try {
-            const prompt = textPrompt;
+            const prompt = textPrompt.target.value;
 
             // This uses axios because of issues formatting the request with fetch
             axios.post('http://127.0.0.1:8000/generate', { prompt })
@@ -149,9 +150,9 @@ export const SubjectInput = () => {
     };
 
     return (
-        <form>
+        <div>
             <div className="relative">
-                <input className="w-2/3 h-16 rounded-md border-slate-300 border-4 font-mono indent-6 text-slate-800 text-lg" type="text" placeholder="Please enter your course topic to generate resources"/>
+                <input onKeyDown={() => sendTextToServer(event)} className="w-2/3 h-16 rounded-md border-slate-300 border-4 font-mono indent-6 text-slate-800 text-lg" type="text" placeholder="Please enter your course topic to generate resources"/>
                 <div className="absolute inset-y-0 right-3 
                     flex items-center
                     w-1/5"
@@ -211,6 +212,6 @@ export const SubjectInput = () => {
             ) : (
                 <div></div>
             )}
-        </form>
+        </div>
     )
 }
