@@ -14,6 +14,8 @@ export const SubjectInput = () => {
 
     const [waitingResponse, setWaitingResponse] = useState(false);
     const [textResponse, setTextResponse] = useState("");
+    const abortController = new AbortController();
+    const signal = abortController.signal;
 
     const getMicrophonePermission = async () => {
         console.log("isRecording:" + isRecording + " permission:" + permission);
@@ -64,6 +66,12 @@ export const SubjectInput = () => {
         }
     };
 
+    const removeAudio = () => {
+        setAudio(null); 
+        abortController.abort();
+        setWaitingResponse(false);
+    }
+
     const sendToServer = async (audioFile) => {
         const formData = new FormData();
         formData.append("file", audioFile);
@@ -74,6 +82,7 @@ export const SubjectInput = () => {
             const response = await fetch("http://127.0.0.1:8000/transcribe", {
                 method: "POST",
                 body: formData,
+                signal: signal,
             });
         
             if (response.ok) {
@@ -97,6 +106,7 @@ export const SubjectInput = () => {
         }
         catch (error) {
             console.error("Error:", error);
+            setWaitingResponse(false);
         }
     };
 
@@ -128,7 +138,7 @@ export const SubjectInput = () => {
                         <audio controls src={audio} 
                         className="h-14 w-full rounded-md font-mono indent-6 text-slate-800 text-lg">
                         </audio>
-                        <button type="button" className="active:scale-95">
+                        <button type="button" className="active:scale-95" onClick={removeAudio}>
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="#dc2626" className="w-12 h-12">
                             <path strokeLinecap="round" strokeLinejoin="round" d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
                             </svg>
