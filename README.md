@@ -1,3 +1,6 @@
+# Video Demonstration 
+[![Video Link](thumbnail.png)](https://www.youtube.com/watch?v=a-jg_55X8vo "AI Resources Generator")
+
 # How to Run
 
 To use the functionality you will need an OpenAI API key, which we will provide if the judges would like to test out our application. 
